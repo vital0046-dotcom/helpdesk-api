@@ -1,0 +1,8 @@
+Flask>=3.1,<4
+Flask-SQLAlchemy>=3.1,<4
+Flask-Migrate>=4,<5
+Flask-Cors>=6,<7
+psycopg[binary]>=3.2,<4
+python-dotenv>=1,<2
+waitress>=3,<4
+gunicorn>=23,<24; sys_platform != 'win32'

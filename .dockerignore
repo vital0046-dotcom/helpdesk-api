@@ -1,0 +1,12 @@
+.venv
+.git
+.env
+instance
+logs
+test-results
+__pycache__
+**/__pycache__
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
