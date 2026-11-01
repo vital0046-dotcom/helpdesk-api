@@ -5,6 +5,12 @@
 Репозиторий: https://github.com/vital0046-dotcom/helpdesk-api.
 Фактические результаты проверок: [docs/VALIDATION.md](docs/VALIDATION.md).
 
+Демо API: https://helpdesk-api-3kw3.onrender.com.
+Проверка доступности: https://helpdesk-api-3kw3.onrender.com/health.
+Размещено 1 ноября 2026 года на Render Free с PostgreSQL. После простоя первый запрос
+может занять около минуты; бесплатная база действует 30 дней с создания.
+Методы `/api/*` требуют заголовок `X-API-Key` — ключ доступен владельцу в Render → Environment.
+
 Учебный REST API на Python для регистрации и обработки обращений.
 Тема практики: «Разработка REST API сервиса обработки заявок технической поддержки на языке Python».
 Интерфейс сервиса — HTTP-запросы и JSON. Веб-кабинет, пароли пользователей и роли в первую версию не входят.

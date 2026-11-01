@@ -2,17 +2,23 @@
 
 import argparse
 import json
+import os
 import re
 import uuid
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
+from dotenv import load_dotenv
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
+    parser.add_argument("--env-file", help="Local file containing API_KEY; never commit it")
     args = parser.parse_args()
+    if args.env_file:
+        load_dotenv(args.env_file, override=False)
     collection = json.loads(
         (
             Path(__file__).resolve().parents[1] / "examples/helpdesk.postman_collection.json"
@@ -31,6 +37,8 @@ def main():
         request = item["request"]
         body = request.get("body", {}).get("raw")
         headers = {h["key"]: h["value"] for h in request.get("header", [])}
+        if os.getenv("API_KEY"):
+            headers["X-API-Key"] = os.environ["API_KEY"]
         req = Request(
             expand(request["url"]),
             data=expand(body).encode() if body is not None else None,
@@ -38,7 +46,7 @@ def main():
             method=request["method"],
         )
         try:
-            response = urlopen(req, timeout=10)
+            response = urlopen(req, timeout=90)
         except HTTPError as error:
             response = error
         with response:
