@@ -1,5 +1,10 @@
 # Сервис заявок технической поддержки
 
+[![Tests](https://github.com/vital0046-dotcom/helpdesk-api/actions/workflows/tests.yml/badge.svg)](https://github.com/vital0046-dotcom/helpdesk-api/actions/workflows/tests.yml)
+
+Репозиторий: https://github.com/vital0046-dotcom/helpdesk-api.
+Фактические результаты проверок: [docs/VALIDATION.md](docs/VALIDATION.md).
+
 Учебный REST API на Python для регистрации и обработки обращений.
 Тема практики: «Разработка REST API сервиса обработки заявок технической поддержки на языке Python».
 Интерфейс сервиса — HTTP-запросы и JSON. Веб-кабинет, пароли пользователей и роли в первую версию не входят.

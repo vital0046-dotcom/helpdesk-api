@@ -1,0 +1,28 @@
+# Creates a demo service and a temporary free PostgreSQL database.
+# Review the current Render plan and database expiry before deploying.
+services:
+  - type: web
+    name: helpdesk-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: helpdesk-db
+          property: connectionString
+      - key: API_KEY
+        generateValue: true
+      - key: LOG_FILE
+        value: logs/requests.jsonl
+
+databases:
+  - name: helpdesk-db
+    databaseName: helpdesk
+    user: helpdesk
+    plan: free
+    region: frankfurt
+    ipAllowList: []
