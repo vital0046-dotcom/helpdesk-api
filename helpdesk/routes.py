@@ -156,11 +156,15 @@ def comments(id):
     )
 
 
-@api.delete("/tickets/<int:id>/comments/<int:comment_id>")
+@api.route("/tickets/<int:id>/comments/<int:comment_id>", methods=["PATCH", "DELETE"])
 def comments_delete(id, comment_id):
     obj = db.get_or_404(Comment, comment_id)
     if obj.ticket_id != id:
         abort(404, description="Comment not found for this ticket")
+    if request.method == "PATCH":
+        data = payload({"text"}, {"text"})
+        obj.text = text(data["text"], "text", 5000)
+        return saved(obj)
     db.session.delete(obj)
     db.session.commit()
     return "", 204

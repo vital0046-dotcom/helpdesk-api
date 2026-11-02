@@ -178,3 +178,15 @@ def test_user_category_edits_and_comment_delete(client, ticket_data):
     assert client.delete(url + f"/{comment['id']}").status_code == 204
     assert client.get(url).json["total"] == 0
     assert client.delete(f"/api/users/{user['id']}").status_code == 204
+
+
+def test_comment_edit_validation_and_scope(client, ticket_data):
+    ticket = create(client, ticket_data)
+    base = f"/api/tickets/{ticket['id']}/comments"
+    comment = client.post(base, json={"text": "Проверяю", "author_id": 1}).json
+    path = f"{base}/{comment['id']}"
+    assert client.patch(path, json={"text": "Исправлено"}).json["text"] == "Исправлено"
+    assert client.patch(path, json={"text": ""}).status_code == 400
+    assert client.patch(path, json={"text": "Другой", "author_id": 1}).status_code == 400
+    assert client.patch(f"/api/tickets/999/comments/{comment['id']}", json={"text": "Ошибка"}).status_code == 404
+    assert client.get(base).json["items"][0]["text"] == "Исправлено"

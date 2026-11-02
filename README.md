@@ -198,3 +198,7 @@ wsgi.py            точка входа сервера
 - [Flask: развёртывание](https://flask.palletsprojects.com/en/stable/deploying/)
 - [Flask-SQLAlchemy: начало работы](https://flask-sqlalchemy.palletsprojects.com/en/stable/quickstart/)
 - [Render: развёртывание Flask](https://render.com/docs/deploy-flask)
+
+## Редактирование данных
+
+Запусти `Редактировать заявки.cmd`: формы пользователей, категорий, заявок и комментариев работают через общий локальный API `http://127.0.0.1:8765`. Оставляй запустившее сервер окно открытым. Инструкция защиты: [docs/READY_TO_PRESENT.md](docs/READY_TO_PRESENT.md). Локальные ключи и файлы Postman находятся в исключённой из Git папке `instance/`.

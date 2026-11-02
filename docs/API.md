@@ -15,7 +15,7 @@ OPTIONS разрешён для CORS preflight; по умолчанию стор
 | GET, POST | /api/tickets | Список и создание заявки |
 | GET, PATCH, DELETE | /api/tickets/{id} | Чтение, изменение, удаление заявки |
 | GET, POST | /api/tickets/{id}/comments | Комментарии заявки |
-| DELETE | /api/tickets/{id}/comments/{comment_id} | Удаление комментария этой заявки |
+| PATCH, DELETE | /api/tickets/{id}/comments/{comment_id} | Изменение текста и удаление комментария этой заявки |
 | GET | /api/stats | Статистика |
 | GET | /health | Доступность подключения к БД |
 

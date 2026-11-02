@@ -96,14 +96,35 @@ class DemoSession:
                 "elapsed": elapsed, "response": pretty, "passed": passed}
 
 
-def start_local():
+def start_local(port=0, shared=False):
     """An isolated persistent SQLite database; only loopback is exposed."""
     from flask_migrate import upgrade
     from werkzeug.serving import make_server
 
     from helpdesk import create_app
+    from tools.api_client import ApiClient, export_postman
 
     key = secrets.token_urlsafe(32)
+    if shared:
+        key_path = ROOT / "instance/presentation-api-key.txt"
+        key_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            with key_path.open("x", encoding="utf-8") as handle:
+                handle.write(key)
+        except FileExistsError:
+            key = key_path.read_text(encoding="utf-8").strip()
+        if len(key) < 32:
+            raise ValueError("Повреждён локальный ключ instance/presentation-api-key.txt")
+        if port:
+            url = f"http://127.0.0.1:{port}"
+            try:
+                client = ApiClient(url, key, timeout=2)
+                if client.request("GET", "/").get("service") == "Helpdesk API":
+                    client.request("GET", "/api/stats")
+                    export_postman(ROOT / "instance/postman", url, key)
+                    return None, url, key
+            except Exception:
+                pass
     database = ROOT / "instance/presentation.db"
     app = create_app({
         "SQLALCHEMY_DATABASE_URI": "sqlite:///" + database.as_posix(),
@@ -112,9 +133,15 @@ def start_local():
     })
     with app.app_context():
         upgrade(directory=str(ROOT / "migrations"))
-    server = make_server("127.0.0.1", 0, app, threaded=True)
+    try:
+        server = make_server("127.0.0.1", port, app, threaded=True)
+    except SystemExit as error:
+        raise RuntimeError(f"Порт {port} занят. Закрой другой локальный сервер и запусти снова.") from error
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    return server, f"http://127.0.0.1:{server.server_port}", key
+    url = f"http://127.0.0.1:{server.server_port}"
+    if shared:
+        export_postman(ROOT / "instance/postman", url, key)
+    return server, url, key
 
 
 class Presenter:
@@ -149,6 +176,8 @@ class Presenter:
         self.selector.bind("<<ComboboxSelected>>", self.change_mode)
         self.reset_button = ttk.Button(bar, text="Новый сценарий", command=self.reset)
         self.reset_button.pack(side="left", padx=8)
+        self.editor_button = ttk.Button(bar, text="Редактировать данные", command=self.open_editor)
+        self.editor_button.pack(side="left")
         self.state = tk.StringVar(value="Запускаю локальный API и применяю миграции…")
         ttk.Label(outer, textvariable=self.state, wraplength=1120, font=("Segoe UI", 10)).pack(anchor="w", pady=10)
         actions = ttk.Frame(outer)
@@ -211,7 +240,7 @@ class Presenter:
 
     def prepare_local(self):
         try:
-            self.events.put(("ready", start_local()))
+            self.events.put(("ready", start_local(port=8765, shared=True)))
         except Exception as error:
             self.events.put(("error", f"Локальный запуск: {error}"))
 
@@ -219,12 +248,19 @@ class Presenter:
         self.busy = busy
         self.selector.configure(state="disabled" if busy else "readonly")
         self.reset_button.configure(state="disabled" if busy else "normal")
+        self.editor_button.configure(state="disabled" if busy or not self.session else "normal")
         done = not self.session or self.session.position >= 14
         self.next_button.configure(state="disabled" if busy or done else "normal")
         self.all_button.configure(state="disabled" if busy or not self.session or self.session.position >= 11 else "normal")
 
     def change_mode(self, _event=None):
         self.reset()
+
+    def open_editor(self):
+        from tools.helpdesk_editor import Editor
+
+        window = tk.Toplevel(self.root)
+        Editor(window, self.session.variables["base_url"], self.session.api_key)
 
     def reset(self):
         remote = self.mode.get().startswith("Render")
